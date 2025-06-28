@@ -1,0 +1,13 @@
+[package]
+name = "harborview"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.45.1", features = [ "full" ] }
+axum = "0.8.4"
+
+[dev-dependencies]
+anyhow = "1.0.98"
+httpc-test = "0.1.10"
+

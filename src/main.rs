@@ -6,12 +6,18 @@ use axum::{
     routing::{ get, post }, 
     body::Body,
     Router,
-    Json
+    Json,
+    debug_handler
 };
 
 //use axum::response::Html;
 
-use std::net::SocketAddr;
+//use std::net::SocketAddr;
+
+mod stockprice;
+
+use stockprice::{get_stockprice_handler,post_stockprice_handler};
+
 
 #[tokio::main]
 async fn main() {
@@ -28,17 +34,21 @@ async fn main() {
 }
 
 fn router() -> Router {
-    Router::new().route("/hello", get(get_handler_2).post(post_handler))
+    Router::new()
+        .route("/hello", get(get_handler_2).post(post_handler))
+        .route("/price", get(get_stockprice_handler).post(post_stockprice_handler))
 }
 
 async fn hello_world() -> &'static str {
     "Hello from Axum, here we come, stockmarket!"
 }
 
+#[debug_handler]
 async fn post_handler() -> impl IntoResponse {
     (StatusCode::CREATED, "Post Created!")
 }
 
+#[debug_handler]
 async fn get_handler_2() -> Response {
     Response::builder()
         .status(StatusCode::CREATED)

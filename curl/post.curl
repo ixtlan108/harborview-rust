@@ -1,0 +1,8 @@
+#!/bin/bash
+
+curl -H 'Content-Type: application/json' \
+      -d '{ "ticker":"NHY","price":45.89}' \
+      -X POST \
+      http://localhost:5050/price
+
+exit 0

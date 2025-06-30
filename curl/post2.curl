@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# curl -X POST -d 'ticker=DNB' -d 'price=345.99' 'http://localhost:5050/price2' 
+
+curl -X POST 'http://localhost:5050/price2?ticker=DNB&price=345.99' 
+
+exit 0

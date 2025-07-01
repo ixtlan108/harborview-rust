@@ -19,9 +19,6 @@ impl PasswordManager<Locked> {
             state: std::marker::PhantomData::<Unlocked>,
         }
     }
-    pub fn list_passwords(&self) -> &HashMap<String,String> {
-        &self.passwords
-    }
 }
 
 impl PasswordManager<Unlocked> {
@@ -32,11 +29,17 @@ impl PasswordManager<Unlocked> {
             state: std::marker::PhantomData::<Locked>,
         }
     }
+    pub fn list_passwords(&self) -> &HashMap<String,String> {
+        &self.passwords
+    }
+    pub fn demo(&self) -> String {
+        String::from("Hello from UNLOCKED!")
+    }
 }
 
 impl <State> PasswordManager<State> {
     pub fn version(&self) -> String {
-        todo!()
+        String::from("1.0") 
     }
 }
 

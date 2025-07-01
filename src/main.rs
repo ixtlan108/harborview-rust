@@ -47,6 +47,12 @@ async fn post_handler() -> impl IntoResponse {
 
 #[debug_handler]
 async fn get_handler_2() -> Response {
+    let pwd = phantom::PasswordManager::new(String::from("secret")); 
+    println!("VERSION: {}", pwd.version());
+    let pwd2 = pwd.unlock(String::from("secret"));
+    println!("VERSION: {}", pwd2.version());
+
+    println!("{}", pwd2.demo());
     Response::builder()
         .status(StatusCode::CREATED)
         .header("Content-Type", "application/json")

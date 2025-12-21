@@ -1,17 +1,17 @@
 #![allow(unused)]
 
-use axum::{debug_handler,Json,Router};
 use axum::body::Body;
 use axum::http::StatusCode;
-use axum::response::{Html,IntoResponse,Response};
-use axum::routing::{get,post};
+use axum::response::{Html, IntoResponse, Response};
+use axum::routing::{get, post};
+use axum::{Json, Router, debug_handler};
 
 //use axum::response::Html;
 
 //use std::net::SocketAddr;
 
-mod stockprice;
 mod phantom;
+mod stockprice;
 
 use stockprice::{get_stockprice_handler, post_stockprice_handler, post_stockprice_handler_2};
 
@@ -47,7 +47,7 @@ async fn post_handler() -> impl IntoResponse {
 
 #[debug_handler]
 async fn get_handler_2() -> Response {
-    let pwd = phantom::PasswordManager::new(String::from("secret")); 
+    let pwd = phantom::PasswordManager::new(String::from("secret"));
     println!("VERSION: {}", pwd.version());
     let pwd2 = pwd.unlock(String::from("secret"));
     println!("VERSION: {}", pwd2.version());

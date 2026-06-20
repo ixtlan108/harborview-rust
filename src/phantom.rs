@@ -7,7 +7,7 @@ pub struct Unlocked;
 
 pub struct PasswordManager<State = Locked> {
     master_pass: String,
-    passwords: HashMap<String,String>,
+    passwords: HashMap<String, String>,
     state: std::marker::PhantomData<State>,
 }
 
@@ -29,7 +29,7 @@ impl PasswordManager<Unlocked> {
             state: std::marker::PhantomData::<Locked>,
         }
     }
-    pub fn list_passwords(&self) -> &HashMap<String,String> {
+    pub fn list_passwords(&self) -> &HashMap<String, String> {
         &self.passwords
     }
     pub fn demo(&self) -> String {
@@ -37,9 +37,9 @@ impl PasswordManager<Unlocked> {
     }
 }
 
-impl <State> PasswordManager<State> {
+impl<State> PasswordManager<State> {
     pub fn version(&self) -> String {
-        String::from("1.0") 
+        String::from("1.0")
     }
 }
 
@@ -47,7 +47,7 @@ impl PasswordManager {
     pub fn new(master_pass: String) -> Self {
         PasswordManager {
             master_pass,
-            passwords:  Default::default(),
+            passwords: Default::default(),
             state: Default::default(),
         }
     }

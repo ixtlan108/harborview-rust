@@ -9,7 +9,9 @@ axum = { version = "0.8.4", features = [ "macros" ] }
 serde = { version = "1.0.219", features = [ "derive" ]}
 binomial_tree = { version = "0.5.0" }
 postgres = { version = "0.19.12" }
-minijinja = { version = "2.14.0", features = ["builtins"] }
+#tokio-postgres = { version = "0.7.17" }
+# minijinja = { version = "2.14.0", features = ["builtins"] }
+tera = { version = "1", default-features = false }
 
 [dev-dependencies]
 anyhow = "1.0.98"

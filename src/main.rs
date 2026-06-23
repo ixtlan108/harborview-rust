@@ -11,6 +11,7 @@ use axum::{Json, Router, debug_handler};
 //use std::net::SocketAddr;
 
 mod phantom;
+mod playwright;
 mod stockprice;
 
 use stockprice::{get_stockprice_handler, post_stockprice_handler, post_stockprice_handler_2};

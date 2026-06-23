@@ -11,13 +11,14 @@ use axum::{Json, Router, debug_handler};
 //use std::net::SocketAddr;
 
 mod phantom;
-mod playwright;
+mod stockoptions;
 mod stockprice;
 
 use stockprice::{get_stockprice_handler, post_stockprice_handler, post_stockprice_handler_2};
 
 #[tokio::main]
 async fn main() {
+    let demo = stockoptions::demo().await.unwrap();
     let addr = "127.0.0.1:5050";
 
     println!("Server listening on {addr:?}\n");

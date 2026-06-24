@@ -19,6 +19,8 @@ use stockprice::{get_stockprice_handler, post_stockprice_handler, post_stockpric
 #[tokio::main]
 async fn main() {
     let demo = stockoptions::demo().await.unwrap();
+
+    /*
     let addr = "127.0.0.1:5050";
 
     println!("Server listening on {addr:?}\n");
@@ -26,6 +28,7 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
 
     axum::serve(listener, router()).await.unwrap();
+    */
 }
 
 fn router() -> Router {

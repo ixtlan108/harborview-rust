@@ -6,6 +6,7 @@
 //use playwright_rs::WaitUntil;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
@@ -15,11 +16,13 @@ struct Payload {
     ps: String,
 }
 
+// fn expiry() -> Vec<String> {
+//     vec!["09-2026"]
+// }
+
 pub async fn demo() -> Result<(), reqwest::Error> {
-    // let url = "https://httpbin.org/post";
     let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/YAR/DOSL";
 
-    // 1. Define your headers
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert(
         reqwest::header::USER_AGENT,
@@ -32,9 +35,10 @@ pub async fn demo() -> Result<(), reqwest::Error> {
         reqwest::header::HeaderValue::from_static("XMLHttpRequest"),
     );
 
-    let payload = Payload { ps: "999".into() };
+    let expirations = vec!["07-2026", "08-2026", "09-2026", "12-2026"];
 
-    // 3. Execute the POST request
+    let payload = json!({ "ps": "999", "md[]": expirations });
+
     let response = reqwest::Client::new()
         .post(url)
         .headers(headers)
@@ -43,7 +47,6 @@ pub async fn demo() -> Result<(), reqwest::Error> {
         .send()
         .await?;
 
-    // 4. Read response text
     let response_text = response.text().await?;
     println!("{}", response_text);
 

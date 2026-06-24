@@ -8,8 +8,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::Write;
+//use std::fs::File;
+use std::fs;
+//use std::io::Write;
 
 #[derive(Serialize, Deserialize)]
 struct Payload {
@@ -21,7 +22,8 @@ struct Payload {
 // }
 
 pub async fn demo() -> Result<(), reqwest::Error> {
-    let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/YAR/DOSL";
+    //let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/YAR/DOSL";
+    let url = "https://live.euronext.com/nb/ajax/submitOptionsForm/stock-options/YAR/DOSL";
 
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert(
@@ -34,10 +36,17 @@ pub async fn demo() -> Result<(), reqwest::Error> {
         "X-Requested-With",
         reqwest::header::HeaderValue::from_static("XMLHttpRequest"),
     );
+    headers.insert(
+        "Content-Type",
+        reqwest::header::HeaderValue::from_static(
+            "application/x-www-form-urlencoded; charset: UTF-8",
+        ),
+    );
 
     let expirations = vec!["07-2026", "08-2026", "09-2026", "12-2026"];
 
-    let payload = json!({ "ps": "999", "md[]": expirations });
+    //let payload = json!({ "ps": "999", "md[]": expirations});
+    let payload = "ps:999&md[]=07-2026&md[]=";
 
     let response = reqwest::Client::new()
         .post(url)
@@ -50,8 +59,22 @@ pub async fn demo() -> Result<(), reqwest::Error> {
     let response_text = response.text().await?;
     println!("{}", response_text);
 
+    fs::write(response_text, "yar.json");
+
     Ok(())
 }
+
+/*
+// Example of processing the response if you want to extract specific data
+if let Some(simple_array) = json_value.get("simple").and_then(|v| v.as_array()) {
+    for item in simple_array {
+        if let Some(maturity) = item.get("maturityDate").and_then(|v| v.as_str()) {
+            println!("Processing maturity date: {}", maturity);
+            // Access 'data' field here if needed
+        }
+    }
+}
+*/
 
 /*
 pub async fn demo() -> Result<(), Box<dyn std::error::Error>> {

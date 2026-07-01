@@ -5,6 +5,7 @@
 //use playwright_rs::Playwright;
 //use playwright_rs::WaitUntil;
 
+use reqwest::{Client, header};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
@@ -22,33 +23,37 @@ struct Payload {
 // }
 
 pub async fn demo() -> Result<(), reqwest::Error> {
-    //let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/YAR/DOSL";
-    let url = "https://live.euronext.com/nb/ajax/submitOptionsForm/stock-options/YAR/DOSL";
+    let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/YAR/DOSL";
+    //let url = "https://live.euronext.com/nb/ajax/submitOptionsForm/stock-options/YAR/DOSL";
 
-    let mut headers = reqwest::header::HeaderMap::new();
+    let mut headers = header::HeaderMap::new();
     headers.insert(
-        reqwest::header::USER_AGENT,
-        reqwest::header::HeaderValue::from_static(
+        header::USER_AGENT,
+        header::HeaderValue::from_static(
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
         ),
     );
     headers.insert(
         "X-Requested-With",
-        reqwest::header::HeaderValue::from_static("XMLHttpRequest"),
+        header::HeaderValue::from_static("XMLHttpRequest"),
     );
     headers.insert(
-        "Content-Type",
-        reqwest::header::HeaderValue::from_static(
-            "application/x-www-form-urlencoded; charset: UTF-8",
-        ),
+        header::CONTENT_TYPE,
+        header::HeaderValue::from_static("application/json"),
     );
+    headers.insert(
+        header::ACCEPT,
+        header::HeaderValue::from_static("application/json"),
+    );
+
+    //"application/x-www-form-urlencoded; charset: UTF-8",
 
     let expirations = vec!["07-2026", "08-2026", "09-2026", "12-2026"];
 
-    //let payload = json!({ "ps": "999", "md[]": expirations});
-    let payload = "ps:999&md[]=07-2026&md[]=";
+    let payload = json!({ "ps": "999", "md[]": expirations});
+    //let payload = "ps:999&md[]=07-2026&md[]=";
 
-    let response = reqwest::Client::new()
+    let response = Client::new()
         .post(url)
         .headers(headers)
         .json(&payload)
@@ -56,10 +61,17 @@ pub async fn demo() -> Result<(), reqwest::Error> {
         .send()
         .await?;
 
+    if !response.status().is_success() {
+        eprintln!("❌ Status: {}", response.status());
+        let body = response.text().await?;
+        eprintln!("❌ Body (likely HTML): {}", body);
+        return Ok(());
+    }
+
     let response_text = response.text().await?;
     println!("{}", response_text);
 
-    fs::write(response_text, "yar.json");
+    fs::write("yar.json", response_text);
 
     Ok(())
 }

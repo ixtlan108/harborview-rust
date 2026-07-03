@@ -23,7 +23,7 @@ struct Payload {
 // }
 
 pub async fn demo() -> Result<(), reqwest::Error> {
-    let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/YAR/DOSL";
+    let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/NHY/DOSL";
     //let url = "https://live.euronext.com/nb/ajax/submitOptionsForm/stock-options/YAR/DOSL";
 
     let mut headers = header::HeaderMap::new();
@@ -48,9 +48,11 @@ pub async fn demo() -> Result<(), reqwest::Error> {
 
     //"application/x-www-form-urlencoded; charset: UTF-8",
 
-    let expirations = vec!["07-2026", "08-2026", "09-2026", "12-2026"];
+    //let expirations = vec!["07-2026", "08-2026", "09-2026", "12-2026"];
 
-    let payload = json!({ "ps": "999", "md[]": expirations});
+    //let payload = json!({ "ps": "999", "md[]": expirations});
+    let payload = json!({ "ps": "999" });
+
     //let payload = "ps:999&md[]=07-2026&md[]=";
 
     let response = Client::new()

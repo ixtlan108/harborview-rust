@@ -75,7 +75,7 @@ pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
     let response_text = response.text().await?;
     println!("{}", response_text);
 
-    fs::write("yar.json", response_text);
+    fs::write(format!("{ticker}.json"), response_text);
 
     Ok(())
 }

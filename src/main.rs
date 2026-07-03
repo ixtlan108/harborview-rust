@@ -18,7 +18,7 @@ use stockprice::{get_stockprice_handler, post_stockprice_handler, post_stockpric
 
 #[tokio::main]
 async fn main() {
-    let demo = stockoptions::demo().await.unwrap();
+    let demo = stockoptions::fetch_option_prices("NHY").await.unwrap();
 
     /*
     let addr = "127.0.0.1:5050";

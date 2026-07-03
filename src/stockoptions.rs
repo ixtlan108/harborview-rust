@@ -22,8 +22,10 @@ struct Payload {
 //     vec!["09-2026"]
 // }
 
-pub async fn demo() -> Result<(), reqwest::Error> {
-    let url = "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/NHY/DOSL";
+pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
+    let url = format!(
+        "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/{ticker}/DOSL"
+    );
     //let url = "https://live.euronext.com/nb/ajax/submitOptionsForm/stock-options/YAR/DOSL";
 
     let mut headers = header::HeaderMap::new();

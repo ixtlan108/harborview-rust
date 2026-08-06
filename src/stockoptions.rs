@@ -12,6 +12,8 @@ use std::collections::HashMap;
 //use std::fs::File;
 use std::fs;
 //use std::io::Write;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 
 #[derive(Serialize, Deserialize)]
 struct Payload {
@@ -21,6 +23,60 @@ struct Payload {
 // fn expiry() -> Vec<String> {
 //     vec!["09-2026"]
 // }
+
+async fn proxy_json_handler() -> impl IntoResponse {
+    let external_url = "https://service.com";
+
+    // 1. Fetch data from the remote service
+    let response = match reqwest::get(external_url).await {
+        Ok(res) => res,
+        Err(_) => return (StatusCode::BAD_GATEWAY, "External API error").into_response(),
+    };
+
+    // 2. Extract raw bytes without decoding or parsing the JSON text
+    let bytes = match response.bytes().await {
+        Ok(b) => b,
+        Err(_) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to read body").into_response();
+        }
+    };
+
+    // 3. Return raw bytes directly with the appropriate HTTP headers
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "application/json")],
+        bytes,
+    )
+        .into_response()
+}
+
+use axum::Json;
+
+// Define the shape of your data
+#[derive(Deserialize, Serialize)]
+struct ServicePayload {
+    id: u64,
+    name: String,
+    is_active: bool,
+}
+
+async fn fetch_and_modify_handler() -> Result<Json<ServicePayload>, StatusCode> {
+    let external_url = "https://service.com";
+
+    // 1. Fetch and immediately deserialize into your Rust struct
+    let payload = reqwest::get(external_url)
+        .await
+        .map_err(|_| StatusCode::BAD_GATEWAY)?
+        .json::<ServicePayload>()
+        .await
+        .map_err(|_| StatusCode::UNPROCESSABLE_ENTITY)?;
+
+    // 2. Perform any operations/modifications if needed here
+    // e.g., let mutated_payload = modify(payload);
+
+    // 3. Return structured data; Axum sets the application/json header automatically
+    Ok(Json(payload))
+}
 
 pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
     let url = format!(

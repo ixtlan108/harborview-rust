@@ -5,6 +5,8 @@ use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router, debug_handler};
+use clap::Parser;
+use std::net::SocketAddr;
 
 //use axum::response::Html;
 
@@ -13,14 +15,31 @@ use axum::{Json, Router, debug_handler};
 mod phantom;
 mod stockoptions;
 mod stockprice;
+//mod yfinance;
+
+#[derive(Parser)]
+struct Args {
+    #[arg(short, long, default_value = "3000")]
+    port: u16,
+}
 
 use stockprice::{get_stockprice_handler, post_stockprice_handler, post_stockprice_handler_2};
 
 #[tokio::main]
 async fn main() {
+    /*
     let nhy = stockoptions::fetch_option_prices("NHY").await.unwrap();
     let yar = stockoptions::fetch_option_prices("YAR").await.unwrap();
     let eqn = stockoptions::fetch_option_prices("EQN").await.unwrap();
+    */
+
+    let args = Args::parse();
+    let addr = SocketAddr::from(([127, 0, 0, 1], args.port));
+
+    println!("Server listening on {addr:?}\n");
+
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    axum::serve(listener, router()).await.unwrap();
 
     /*
     let addr = "127.0.0.1:5050";

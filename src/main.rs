@@ -25,6 +25,8 @@ struct Args {
 
 use stockprice::{get_stockprice_handler, post_stockprice_handler, post_stockprice_handler_2};
 
+use crate::stockoptions::{fetch_option_prices, fetch_option_prices_proxy};
+
 #[tokio::main]
 async fn main() {
     /*
@@ -32,6 +34,7 @@ async fn main() {
     let yar = stockoptions::fetch_option_prices("YAR").await.unwrap();
     let eqn = stockoptions::fetch_option_prices("EQN").await.unwrap();
     */
+    let yar = stockoptions::fetch_option_prices("YAR").await.unwrap();
 
     let args = Args::parse();
     let addr = SocketAddr::from(([127, 0, 0, 1], args.port));
@@ -60,6 +63,7 @@ fn router() -> Router {
             get(get_stockprice_handler).post(post_stockprice_handler),
         )
         .route("/price2", post(post_stockprice_handler_2))
+        .route("/proxy/{ticker}", get(fetch_option_prices_proxy))
 }
 
 async fn hello_world() -> &'static str {

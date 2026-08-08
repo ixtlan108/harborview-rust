@@ -5,13 +5,14 @@
 //use playwright_rs::Playwright;
 //use playwright_rs::WaitUntil;
 
-use reqwest::{Client, header};
+use reqwest::{Client, Response, header};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 //use std::fs::File;
 use std::fs;
 //use std::io::Write;
+use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
@@ -24,32 +25,7 @@ struct Payload {
 //     vec!["09-2026"]
 // }
 
-async fn proxy_json_handler() -> impl IntoResponse {
-    let external_url = "https://service.com";
-
-    // 1. Fetch data from the remote service
-    let response = match reqwest::get(external_url).await {
-        Ok(res) => res,
-        Err(_) => return (StatusCode::BAD_GATEWAY, "External API error").into_response(),
-    };
-
-    // 2. Extract raw bytes without decoding or parsing the JSON text
-    let bytes = match response.bytes().await {
-        Ok(b) => b,
-        Err(_) => {
-            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to read body").into_response();
-        }
-    };
-
-    // 3. Return raw bytes directly with the appropriate HTTP headers
-    (
-        StatusCode::OK,
-        [(header::CONTENT_TYPE, "application/json")],
-        bytes,
-    )
-        .into_response()
-}
-
+/*
 use axum::Json;
 
 // Define the shape of your data
@@ -76,6 +52,46 @@ async fn fetch_and_modify_handler() -> Result<Json<ServicePayload>, StatusCode> 
 
     // 3. Return structured data; Axum sets the application/json header automatically
     Ok(Json(payload))
+}
+*/
+
+pub async fn fetch_option_prices_proxy(Path(ticker): Path<String>) -> impl IntoResponse {
+    /*
+    let external_url = "https://service.com";
+
+    // 1. Fetch data from the remote service
+    let response = match reqwest::get(external_url).await {
+        Ok(res) => res,
+        Err(_) => return (StatusCode::BAD_GATEWAY, "External API error").into_response(),
+    };
+
+    // 2. Extract raw bytes without decoding or parsing the JSON text
+    let bytes = match response.bytes().await {
+        Ok(b) => b,
+        Err(_) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to read body").into_response();
+        }
+    };
+    */
+    let response = match reqwest::get("https::/whatever.com").await {
+        //let response = match fetch_option_prices(&ticker).await {
+        Ok(res) => res,
+        Err(_) => return (StatusCode::BAD_GATEWAY, "External API error").into_response(),
+    };
+
+    let bytes = match response.bytes().await {
+        Ok(b) => b,
+        Err(_) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to read body").into_response();
+        }
+    };
+    // 3. Return raw bytes directly with the appropriate HTTP headers
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "application/json")],
+        bytes,
+    )
+        .into_response()
 }
 
 pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
@@ -121,18 +137,18 @@ pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
         .send()
         .await?;
 
-    if !response.status().is_success() {
-        eprintln!("❌ Status: {}", response.status());
-        let body = response.text().await?;
-        eprintln!("❌ Body (likely HTML): {}", body);
-        return Ok(());
-    }
+    // if !response.status().is_success() {
+    //     eprintln!("❌ Status: {}", response.status());
+    //     let body = response.text().await?;
+    //     eprintln!("❌ Body (likely HTML): {}", body);
+    // }
 
     let response_text = response.text().await?;
     println!("{}", response_text);
 
     fs::write(format!("{ticker}.json"), response_text);
 
+    //*/
     Ok(())
 }
 

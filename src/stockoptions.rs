@@ -71,7 +71,9 @@ pub struct SimpleData {
 
 #[derive(Debug, Deserialize)]
 pub struct MarketItem {
+    #[serde(rename = "atTheMoney")]
     pub at_the_money: bool,
+
     pub c_settl: String,
     pub c_last: String,
     pub c_bid: String,

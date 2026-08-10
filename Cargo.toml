@@ -20,3 +20,4 @@ clap = { version = "4.6.1", features = ["derive"] }
 [dev-dependencies]
 anyhow = "1.0.98"
 httpc-test = "0.1.10"
+pretty_assertions = "1.4.1"

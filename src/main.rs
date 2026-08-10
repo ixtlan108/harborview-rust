@@ -34,7 +34,6 @@ async fn main() {
     let yar = stockoptions::fetch_option_prices("YAR").await.unwrap();
     let eqn = stockoptions::fetch_option_prices("EQN").await.unwrap();
     */
-    let yar = stockoptions::fetch_option_prices("YAR").await.unwrap();
 
     let args = Args::parse();
     let addr = SocketAddr::from(([127, 0, 0, 1], args.port));

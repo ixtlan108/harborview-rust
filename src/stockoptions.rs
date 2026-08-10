@@ -55,6 +55,34 @@ async fn fetch_and_modify_handler() -> Result<Json<ServicePayload>, StatusCode> 
 }
 */
 
+#[derive(Debug, Deserialize)]
+pub struct Root {
+    // By only defining "simple", Serde completely ignores "extended"
+    pub simple: Vec<SimpleData>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SimpleData {
+    pub maturity_date: String,
+    pub volume_date: String,
+    pub data: Vec<MarketItem>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct MarketItem {
+    pub at_the_money: bool,
+    pub c_settl: String,
+    pub c_last: String,
+    pub c_bid: String,
+    pub c_ask: String,
+    pub strike: String,
+    pub p_bid: String,
+    pub p_ask: String,
+    pub p_last: String,
+    pub p_settl: String,
+}
+
 pub async fn fetch_option_prices_proxy(Path(ticker): Path<String>) -> impl IntoResponse {
     /*
     let external_url = "https://service.com";
@@ -73,8 +101,8 @@ pub async fn fetch_option_prices_proxy(Path(ticker): Path<String>) -> impl IntoR
         }
     };
     */
-    let response = match reqwest::get("https::/whatever.com").await {
-        //let response = match fetch_option_prices(&ticker).await {
+    //let response = match reqwest::get("https::/whatever.com").await {
+    let response = match fetch_option_prices(&ticker).await {
         Ok(res) => res,
         Err(_) => return (StatusCode::BAD_GATEWAY, "External API error").into_response(),
     };
@@ -94,7 +122,7 @@ pub async fn fetch_option_prices_proxy(Path(ticker): Path<String>) -> impl IntoR
         .into_response()
 }
 
-pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
+pub async fn fetch_option_prices(ticker: &str) -> Result<Response, reqwest::Error> {
     let url = format!(
         "https://live.euronext.com/nb/ajax/getPricesOptionsAjax/stock-options/{ticker}/DOSL"
     );
@@ -112,6 +140,12 @@ pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
         header::HeaderValue::from_static("XMLHttpRequest"),
     );
     headers.insert(
+        "Referer",
+        header::HeaderValue::from_static(
+            "https://live.euronext.com/en/product/derivatives/YAR-DOSL",
+        ),
+    );
+    headers.insert(
         header::CONTENT_TYPE,
         header::HeaderValue::from_static("application/json"),
     );
@@ -124,6 +158,7 @@ pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
 
     //let expirations = vec!["07-2026", "08-2026", "09-2026", "12-2026"];
 
+    /*
     //let payload = json!({ "ps": "999", "md[]": expirations});
     let payload = json!({ "ps": "999" });
 
@@ -136,22 +171,68 @@ pub async fn fetch_option_prices(ticker: &str) -> Result<(), reqwest::Error> {
         //.form(&payload) // Automatically URL-encodes data
         .send()
         .await?;
+    */
+
+    let response = Client::new().get(url).headers(headers).send().await?;
 
     // if !response.status().is_success() {
     //     eprintln!("❌ Status: {}", response.status());
     //     let body = response.text().await?;
     //     eprintln!("❌ Body (likely HTML): {}", body);
+    //     return Ok(());
     // }
 
-    let response_text = response.text().await?;
-    println!("{}", response_text);
+    // let response_text = response.text().await?;
+    // println!("{}", response_text);
 
-    fs::write(format!("{ticker}.json"), response_text);
+    // fs::write(format!("{ticker}.json"), response_text);
 
-    //*/
-    Ok(())
+    Ok(response)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::{Result, bail};
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_parse_without_prices() -> Result<()> {
+        let json_data = r#"
+        {
+          "simple": [
+            {
+              "maturityDate": "Aug 2026",
+              "volumeDate": "07/08/26",
+              "data": [
+                {
+                  "atTheMoney": false,
+                  "c_settl": "29.50",
+                  "c_last": "-",
+                  "c_bid": "-",
+                  "c_ask": "-",
+                  "c_link": "https://abc.com",
+                  "strike": "390.00",
+                  "p_link": "https://abc.com",
+                  "p_bid": "-",
+                  "p_ask": "-",
+                  "p_last": "-",
+                  "p_settl": "2.66"
+                }
+              ]
+            }
+          ]
+        }"#;
+        let parsed: Root = serde_json::from_str(json_data)?;
+        for item in parsed.simple {
+            println!(
+                "Maturity: {}, Strike: {}",
+                item.maturity_date, item.data[0].strike
+            );
+        }
+        Ok(())
+    }
+}
 /*
 // Example of processing the response if you want to extract specific data
 if let Some(simple_array) = json_value.get("simple").and_then(|v| v.as_array()) {
